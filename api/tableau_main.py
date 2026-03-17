@@ -22,7 +22,6 @@ async def root():
 @app.get("/health")
 async def health():
     try:
-        # Test database connection
         conn = sqlite3.connect('sales_analytics.db')
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM orders")
@@ -40,6 +39,25 @@ async def health():
             "error": str(e)
         }
 
+@app.get("/kpi")
+async def get_kpi():
+    try:
+        conn = sqlite3.connect('sales_analytics.db')
+        
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*), SUM(Sales), SUM(Profit) FROM orders")
+        orders, sales, profit = cursor.fetchone()
+        
+        conn.close()
+        
+        return {
+            "total_orders": orders,
+            "total_sales": sales,
+            "total_profit": profit
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/tableau/sales")
 async def get_tableau_sales():
     """Tableau-compatible CSV export"""
@@ -48,7 +66,6 @@ async def get_tableau_sales():
         df = pd.read_sql("SELECT * FROM orders", conn)
         conn.close()
         
-        # Format for Tableau
         csv_data = df.to_csv(index=False)
         
         from fastapi.responses import Response
@@ -66,30 +83,22 @@ async def get_tableau_kpi():
     try:
         conn = sqlite3.connect('sales_analytics.db')
         
-        # Multiple KPIs for Tableau
         cursor = conn.cursor()
-        
-        # Overall KPIs
         cursor.execute("SELECT COUNT(*), SUM(Sales), SUM(Profit), AVG(Sales) FROM orders")
         orders, sales, profit, avg_sales = cursor.fetchone()
         
-        # Regional KPIs
         cursor.execute("SELECT Region, COUNT(*), SUM(Sales), SUM(Profit) FROM orders GROUP BY Region")
         regional_data = cursor.fetchall()
         
         conn.close()
         
-        # Create CSV with multiple sections
         csv_lines = []
-        
-        # Overall KPIs
         csv_lines.append("KPI_Type,Metric,Value")
         csv_lines.append(f"Overall,Total Orders,{orders}")
         csv_lines.append(f"Overall,Total Sales,{sales}")
         csv_lines.append(f"Overall,Total Profit,{profit}")
         csv_lines.append(f"Overall,Average Order Value,{avg_sales}")
         
-        # Regional KPIs
         for region, count, reg_sales, reg_profit in regional_data:
             csv_lines.append(f"Regional_{region},Order Count,{count}")
             csv_lines.append(f"Regional_{region},Sales,{reg_sales}")
@@ -105,67 +114,6 @@ async def get_tableau_kpi():
         )
     except Exception as e:
         return {"error": str(e)}
-async def get_kpi_csv():
-    try:
-        conn = sqlite3.connect('sales_analytics.db')
-        
-        # Simple KPIs
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*), SUM(Sales), SUM(Profit) FROM orders")
-        orders, sales, profit = cursor.fetchone()
-        
-        conn.close()
-        
-        # Create CSV response
-        csv_data = f"Metric,Value\nTotal Orders,{orders}\nTotal Sales,{sales}\nTotal Profit,{profit}"
-        
-        from fastapi.responses import Response
-        return Response(
-            content=csv_data,
-            media_type="text/csv",
-            headers={"Content-Disposition": "attachment; filename=kpi_data.csv"}
-        )
-    except Exception as e:
-        return {"error": str(e)}
-
-@app.get("/sales/csv")
-async def get_sales_csv():
-    try:
-        conn = sqlite3.connect('sales_analytics.db')
-        df = pd.read_sql("SELECT * FROM orders", conn)
-        conn.close()
-        
-        # Convert to CSV
-        csv_data = df.to_csv(index=False)
-        
-        from fastapi.responses import Response
-        return Response(
-            content=csv_data,
-            media_type="text/csv",
-            headers={"Content-Disposition": "attachment; filename=sales_data.csv"}
-        )
-    except Exception as e:
-        return {"error": str(e)}
-
-@app.get("/kpi")
-async def get_kpi():
-    try:
-        conn = sqlite3.connect('sales_analytics.db')
-        
-        # Simple KPIs
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*), SUM(Sales), SUM(Profit) FROM orders")
-        orders, sales, profit = cursor.fetchone()
-        
-        conn.close()
-        
-        return {
-            "total_orders": orders,
-            "total_sales": sales,
-            "total_profit": profit
-        }
-    except Exception as e:
-        return {"error": str(e)}
 
 # Create sample data on startup
 @app.on_event("startup")
@@ -174,7 +122,6 @@ async def startup_event():
         print("Creating sample database...")
         conn = sqlite3.connect('sales_analytics.db')
         
-        # Create orders table
         conn.execute('''
             CREATE TABLE orders (
                 "Order ID" TEXT PRIMARY KEY,
@@ -191,7 +138,6 @@ async def startup_event():
             )
         ''')
         
-        # Insert sample data
         sample_data = [
             ('ORD0001', '2024-01-01', 'CUST001', 'PROD001', 100.0, 20.0, 2, 0.0, 'North', 200.0, 10.0),
             ('ORD0002', '2024-01-02', 'CUST002', 'PROD002', 150.0, 30.0, 1, 0.1, 'South', 135.0, 22.2),
