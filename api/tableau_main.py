@@ -28,11 +28,11 @@ def create_tableau_database():
     conn = sqlite3.connect('tableau_sales.db')
     
     # Create orders table with Tableau-optimized schema
-    conn.execute('''
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS orders (
             "Order ID" TEXT PRIMARY KEY,
-            "Order Date" DATE,
-            "Ship Date" DATE,
+            "Order Date" TEXT,
+            "Ship Date" TEXT,
             "Customer ID" TEXT,
             "Customer Name" TEXT,
             "Segment" TEXT,
@@ -50,10 +50,10 @@ def create_tableau_database():
             "Profit" REAL,
             "Shipping Cost" REAL
         )
-    ''')
+    """)
     
     # Create customers dimension table
-    conn.execute('''
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS customers (
             "Customer ID" TEXT PRIMARY KEY,
             "Customer Name" TEXT,
@@ -64,17 +64,17 @@ def create_tableau_database():
             "Postal Code" TEXT,
             "Region" TEXT
         )
-    ''')
+    """)
     
     # Create products dimension table
-    conn.execute('''
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS products (
             "Product ID" TEXT PRIMARY KEY,
             "Product Name" TEXT,
             "Category" TEXT,
             "Sub-Category" TEXT
         )
-    ''')
+    """)
     
     # Generate comprehensive sample data
     if not conn.execute("SELECT COUNT(*) FROM orders").fetchone()[0]:
@@ -163,22 +163,22 @@ def create_tableau_database():
             })
         
         # Insert data
-        conn.executemany('''
+        conn.executemany("""
             INSERT OR REPLACE INTO orders VALUES 
             (:Order ID, :Order Date, :Ship Date, :Customer ID, :Customer Name, :Segment, 
              :Product ID, :Product Name, :Category, :Sub-Category, :Region, :State, :Country, 
              :Postal Code, :Sales, :Quantity, :Discount, :Profit, :Shipping Cost)
-        ''', orders_data)
+        """, orders_data)
         
-        conn.executemany('''
+        conn.executemany("""
             INSERT OR REPLACE INTO customers VALUES 
             (:Customer ID, :Customer Name, :Segment, :City, :State, :Country, :Postal Code, :Region)
-        ''', customers_data)
+        """, customers_data)
         
-        conn.executemany('''
+        conn.executemany("""
             INSERT OR REPLACE INTO products VALUES 
             (:Product ID, :Product Name, :Category, :Sub-Category)
-        ''', products_data)
+        """, products_data)
         
         conn.commit()
         print(f"Generated {len(orders_data)} orders, {len(customers_data)} customers, {len(products_data)} products")
