@@ -8,8 +8,7 @@ from typing import List, Dict, Any
 # Import database connection
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from etl.load import get_database_connection
+from sqlalchemy import create_engine, text
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,7 +31,12 @@ app.add_middleware(
 )
 
 # Get database engine
-engine = get_database_connection()
+def get_engine():
+    """Create database engine"""
+    return create_engine("sqlite:///sales_analytics.db", echo=False)
+
+# Initialize engine
+engine = get_engine()
 
 @app.get("/")
 async def root():
