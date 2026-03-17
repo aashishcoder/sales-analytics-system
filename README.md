@@ -1,269 +1,98 @@
-# Sales Analytics System
+# Tableau Sales Analytics System
 
-A production-ready sales analytics system with ETL pipeline, REST API, and dashboard integration.
+A production-ready sales analytics API optimized specifically for Tableau Web Data Connector with comprehensive business intelligence capabilities.
 
-## 🏗️ Architecture
+## 🎯 **Tableau Integration**
 
-```
-Data Source (Kaggle) → ETL Pipeline → Database → REST API → Dashboard
-```
+### **🔗 Connect Methods**
+- **Web Data Connector**: `https://sales-analytics-system-4ng8.onrender.com/tableau_wdc.html`
+- **CSV Downloads**: Direct file downloads for quick import
+- **JSON API**: For custom Tableau integrations
 
-## 📁 Project Structure
+### **📊 Data Overview**
+- **2,000+ orders** with realistic business metrics
+- **500 customers** across 3 segments
+- **200 products** in 3 categories  
+- **5 regions** for geographic analysis
+- **2 years** of historical data
 
-```
-sales-analytics-system/
-├── data/
-│   ├── raw/           # Raw data from Kaggle
-│   └── processed/     # Transformed data
-├── etl/
-│   ├── extract.py     # Data extraction
-│   ├── transform.py   # Data transformation
-│   └── load.py        # Database loading
-├── database/
-│   └── db.py          # Database connection
-├── api/
-│   └── main.py        # FastAPI REST API
-├── dashboards/
-│   ├── powerbi/       # Power BI connections
-│   └── excel/         # Excel dashboards
-├── scripts/
-│   └── run_pipeline.py # ETL pipeline runner
-├── requirements.txt   # Python dependencies
-└── README.md         # This file
-```
+## 🚀 **Quick Start**
 
-## 🚀 Quick Start
+### **Method 1: Web Data Connector (Recommended)**
+1. **Tableau Desktop** → Connect → To a Server → More → Web Data Connector
+2. **URL**: `https://sales-analytics-system-4ng8.onrender.com/tableau_wdc.html`
+3. **Click** "Connect Sales Data to Tableau"
+4. **Build** your dashboards
 
-### 1. Install Dependencies
+### **Method 2: CSV Import**
 ```bash
-pip install -r requirements.txt
+# Download data directly
+https://sales-analytics-system-4ng8.onrender.com/tableau/orders
+https://sales-analytics-system-4ng8.onrender.com/tableau/customers
+https://sales-analytics-system-4ng8.onrender.com/tableau/products
+https://sales-analytics-system-4ng8.onrender.com/tableau/kpi
 ```
 
-### 2. Run ETL Pipeline
-```bash
-python scripts/run_pipeline.py
+## 📈 **Tableau Dashboard Examples**
+
+### **Essential Visualizations**
+```tableau
+// Key Metrics
+Total Sales: SUM([Sales])
+Total Profit: SUM([Profit])  
+Order Count: COUNT([Order ID])
+Avg Order Value: AVG([Sales])
+
+// Calculated Fields
+Profit Margin: [Profit] / [Sales]
+High Value Orders: IF [Sales] > 500 THEN "High" ELSE "Standard" END
 ```
 
-### 3. Start API Server
-```bash
-python api/main.py
-```
+### **Dashboard Layout**
+- **KPI Cards**: Sales, Profit, Orders, AOV
+- **Regional Analysis**: Sales by region bar chart
+- **Product Performance**: Category pie chart
+- **Customer Segments**: Segment donut chart
+- **Time Series**: Sales trend line chart
 
-### 4. Access API Documentation
-- **API Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-- **KPI Endpoint**: http://localhost:8000/kpi
+## 🔧 **API Endpoints**
 
-## 📊 API Endpoints
+| Endpoint | Description | Format |
+|----------|-------------|--------|
+| `/health` | API status | JSON |
+| `/tableau/orders` | Complete orders data | CSV |
+| `/tableau/customers` | Customer dimension | CSV |
+| `/tableau/products` | Product catalog | CSV |
+| `/tableau/kpi` | KPI summary | CSV |
+| `/tableau/orders/json` | Orders for WDC | JSON |
 
-| Endpoint | Description | Example |
-|----------|-------------|---------|
-| `/` | API information | `GET /` |
-| `/health` | Health check | `GET /health` |
-| `/kpi` | Key performance indicators | `GET /kpi` |
-| `/sales` | Sales data with pagination | `GET /sales?limit=1000` |
-| `/customers` | Customer analytics | `GET /customers` |
-| `/products` | Product performance | `GET /products` |
-| `/regions` | Regional analysis | `GET /regions` |
-| `/sales-trends` | Time series data | `GET /sales-trends` |
-| `/top-products` | Top products | `GET /top-products?limit=10` |
+## 🌐 **Live Demo**
+- **API**: https://sales-analytics-system-4ng8.onrender.com
+- **Web Data Connector**: https://sales-analytics-system-4ng8.onrender.com/tableau_wdc.html
+- **Health Check**: https://sales-analytics-system-4ng8.onrender.com/health
 
-## 🔧 Configuration
+## 📱 **Deployment**
+- **Platform**: Render Cloud
+- **Database**: SQLite (optimized for Tableau)
+- **Framework**: FastAPI with CORS support
+- **Auto-refresh**: Real-time data updates
 
-### Database
-- **Default**: SQLite (`sales_analytics.db`)
-- **Production**: PostgreSQL (uncomment psycopg2 in requirements.txt)
+## 🎨 **Tableau Features**
+- **Star schema** optimized for Tableau
+- **Proper data types** for all fields
+- **Calculated fields** ready to use
+- **Geographic data** for maps
+- **Time series** for trend analysis
 
-### Environment Variables
-```bash
-# For PostgreSQL (optional)
-DATABASE_URL=postgresql://user:password@localhost:5432/salesdb
-```
-
-## 📈 Dashboard Integration
-
-### Power BI
-1. Open Power BI Desktop
-2. Get Data → Web
-3. Enter API URL: `http://localhost:8000/sales`
-4. Transform and visualize data
-
-### Excel
-1. Data → From Web
-2. Enter API endpoint
-3. Refresh data automatically
-
-## 🔄 Automation
-
-### Cron Job (Linux/Mac)
-```bash
-# Edit crontab
-crontab -e
-
-# Add daily pipeline run at 2 AM
-0 2 * * * cd /path/to/sales-analytics-system && python scripts/run_pipeline.py
-```
-
-### Windows Task Scheduler
-1. Open Task Scheduler
-2. Create Basic Task
-3. Trigger: Daily at 2:00 AM
-4. Action: Run `python scripts/run_pipeline.py`
-
-## 🐳 Docker Deployment
-
-Create `Dockerfile`:
-```dockerfile
-FROM python:3.10-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-EXPOSE 8000
-
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-Build and run:
-```bash
-docker build -t sales-analytics .
-docker run -p 8000:8000 sales-analytics
-```
-
-## ☁️ Cloud Deployment
-
-### Render (Recommended) 🚀
-
-**Quick Deploy:**
-1. Push to GitHub: `gh repo create sales-analytics-system --public --source=. --remote=origin --push`
-2. Go to [Render.com](https://render.com)
-3. Connect GitHub → Select repository
-4. Deploy with default settings
-
-**Live Demo:** `https://sales-analytics-system.onrender.com`
-
-**API Endpoints:**
-- **Health**: `/health`
-- **KPIs**: `/kpi` 
-- **Documentation**: `/docs`
-
-### Railway
-1. Import from GitHub
-2. Auto-deploy on push
-3. Get public URL
-
-### AWS (Advanced)
-- Use ECS or Lambda
-- Set up RDS for PostgreSQL
-- Configure API Gateway
-
-## 📊 Data Schema
-
-### Star Schema Design
-- **Fact Table**: `orders`
-- **Dimension Tables**: `customers`, `products`, `calendar`
-
-### Key Metrics
-- Total Sales, Profit, Orders
-- Customer Segmentation
-- Product Performance
-- Regional Analysis
-- Time Series Trends
-
-## 🔍 Monitoring
-
-### Health Checks
-```bash
-curl http://localhost:8000/health
-```
-
-### Logs
-```bash
-tail -f pipeline.log
-```
-
-### API Testing
-```bash
-# Test KPI endpoint
-curl http://localhost:8000/kpi
-
-# Test sales data
-curl http://localhost:8000/sales?limit=10
-```
-
-## 🧪 Testing
-
-```bash
-# Run tests
-pytest
-
-# Code formatting
-black .
-
-# Linting
-flake8 .
-```
-
-## 📈 Performance
-
-### Database Optimization
-- Indexed columns for fast queries
-- Connection pooling
-- Query optimization
-
-### API Performance
-- Response time < 200ms
-- Pagination for large datasets
-- Caching for frequent queries
-
-## 🔒 Security
-
-### API Security
-- CORS middleware configured
-- Input validation
-- Error handling
-
-### Database Security
-- Parameterized queries
-- Connection encryption
-- Access controls
-
-## 📚 Documentation
-
-- **API Documentation**: `/docs` endpoint
-- **Code Comments**: Inline documentation
-- **README**: This file
-
-## 🤝 Contributing
-
-1. Fork repository
-2. Create feature branch
-3. Make changes
-4. Add tests
-5. Submit pull request
-
-## 📄 License
-
-MIT License - see LICENSE file
-
-## 🆘 Support
-
-- **Issues**: GitHub Issues
-- **Documentation**: README.md
-- **API**: /docs endpoint
+## 📞 **Documentation**
+- **Complete Guide**: See `README_TABLEAU.md`
+- **API Docs**: Available at `/docs` endpoint
+- **Web Data Connector**: Interactive setup page
 
 ---
 
-## 🎯 Resume Description
+## 🌟 **Resume Achievement**
 
-**Sales Analytics System (Python, FastAPI, SQL)**
+> Built production-ready Tableau sales analytics system with Web Data Connector integration, serving comprehensive business intelligence with 2,000+ orders, customer segmentation, and real-time KPI tracking. Designed optimized database schema for Tableau performance and created interactive dashboards with regional analysis and trend visualization.
 
-Built production-ready sales analytics system with complete ETL pipeline processing 9,994+ retail transactions. Designed star schema database architecture with SQLAlchemy ORM and implemented RESTful API serving real-time KPIs and analytics endpoints. Created automated data pipeline using Kaggle Hub API for continuous data updates with error handling and logging. Deployed microservices architecture supporting Power BI and Excel dashboard integration with pagination and performance optimization.
-
----
-
-**Status**: ✅ Production Ready  
-**Last Updated**: 2026-03-18  
-**Version**: 1.0.0
+**🎯 Perfect for Tableau professionals, business analysts, and data visualization portfolios!**
