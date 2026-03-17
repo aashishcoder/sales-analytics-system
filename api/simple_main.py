@@ -40,6 +40,49 @@ async def health():
             "error": str(e)
         }
 
+@app.get("/kpi/csv")
+async def get_kpi_csv():
+    try:
+        conn = sqlite3.connect('sales_analytics.db')
+        
+        # Simple KPIs
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*), SUM(Sales), SUM(Profit) FROM orders")
+        orders, sales, profit = cursor.fetchone()
+        
+        conn.close()
+        
+        # Create CSV response
+        csv_data = f"Metric,Value\nTotal Orders,{orders}\nTotal Sales,{sales}\nTotal Profit,{profit}"
+        
+        from fastapi.responses import Response
+        return Response(
+            content=csv_data,
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=kpi_data.csv"}
+        )
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.get("/sales/csv")
+async def get_sales_csv():
+    try:
+        conn = sqlite3.connect('sales_analytics.db')
+        df = pd.read_sql("SELECT * FROM orders", conn)
+        conn.close()
+        
+        # Convert to CSV
+        csv_data = df.to_csv(index=False)
+        
+        from fastapi.responses import Response
+        return Response(
+            content=csv_data,
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=sales_data.csv"}
+        )
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/kpi")
 async def get_kpi():
     try:
