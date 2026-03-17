@@ -21,4 +21,4 @@ RUN mkdir -p data/raw data/processed
 EXPOSE $PORT
 
 # Start API directly (skip ETL for now)
-CMD ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
+CMD ["python", "-m", "uvicorn", "api.tableau_main:app", "--host", "0.0.0.0", "--port", "$PORT"]
