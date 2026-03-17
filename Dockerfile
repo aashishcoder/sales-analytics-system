@@ -20,5 +20,5 @@ RUN mkdir -p data/raw data/processed
 # Expose port
 EXPOSE $PORT
 
-# Run ETL pipeline on startup, then start API
-CMD ["sh", "-c", "python scripts/run_pipeline.py && python -m uvicorn api.main:app --host 0.0.0.0 --port $PORT"]
+# Start API directly (skip ETL for now)
+CMD ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "$PORT"]

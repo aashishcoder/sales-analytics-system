@@ -35,8 +35,15 @@ def get_engine():
     """Create database engine"""
     return create_engine("sqlite:///sales_analytics.db", echo=False)
 
-# Initialize engine
+# Initialize engine and create sample data if needed
 engine = get_engine()
+
+# Create sample database if it doesn't exist
+import os
+if not os.path.exists('sales_analytics.db'):
+    print("Creating sample database...")
+    import subprocess
+    subprocess.run(['python', 'create_sample_data.py'])
 
 @app.get("/")
 async def root():
